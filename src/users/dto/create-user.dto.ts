@@ -15,14 +15,14 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   password: string;
 
   @IsOptional()
   @Length(0, 200)
-  about: string;
+  about?: string;
 
   @IsOptional()
   @IsUrl()
-  avatar: string;
+  avatar?: string;
 }
