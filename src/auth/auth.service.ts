@@ -22,10 +22,15 @@ export class AuthService {
   async validatePassword(username: string, password: string): Promise<any> {
     const user = await this.usersService.findOneByQuery({
       select: { username: true, password: true, id: true },
+
       where: { username },
     });
 
-    if (user && this.bcryptService.comparePasswords(password, user.password)) {
+    console.log(password);
+    if (
+      user &&
+      (await this.bcryptService.comparePasswords(password, user.password))
+    ) {
       /* Исключаем пароль из результата */
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;

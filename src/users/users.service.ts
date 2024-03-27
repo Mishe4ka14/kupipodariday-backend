@@ -59,6 +59,12 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('Такого пользователя нет');
     }
+    if (updateUserDto.password) {
+      const hashedPassword = await this.bcryptService.hashPassword(
+        updateUserDto.password,
+      );
+      updateUserDto.password = hashedPassword;
+    }
     return this.userRepository.save({ ...user, ...updateUserDto }); // оператор расширения
   }
 
