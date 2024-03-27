@@ -13,11 +13,9 @@ export class AuthController {
 
   @UseGuards(LocalGuard)
   @Post('signin')
-  signin(@Req() user): Promise<any> {
-    /* Генерируем для пользователя JWT-токен */
-    return this.authService.auth(user);
+  async signin(@Req() request): Promise<any> {
+    return this.authService.auth(request.user);
   }
-
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
     /* При регистрации создаём пользователя и генерируем для него токен */

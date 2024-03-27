@@ -11,7 +11,6 @@ export class AuthService {
     private usersService: UsersService,
     private bcryptService: BcryptService,
   ) {}
-
   async auth(user: User) {
     const { username, id: sub } = user;
 
