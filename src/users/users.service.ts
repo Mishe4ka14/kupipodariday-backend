@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, ILike, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUsersDto } from './dto/find-users.dto';
@@ -42,7 +42,10 @@ export class UsersService {
 
   async findManyByQuery({ query }: FindUsersDto): Promise<User[]> {
     const users = await this.userRepository.find({
-      where: [{ username: query }, { email: query }],
+      where: [
+        { username: ILike(`%${query}%`) },
+        { email: ILike(`%${query}%`) },
+      ],
     });
     if (users.length === 0) {
       throw new NotFoundException('Таких пользователей нет');
@@ -52,6 +55,10 @@ export class UsersService {
 
   async findOneByQuery(query: FindOneOptions<User>): Promise<User> {
     return this.userRepository.findOneOrFail(query);
+  }
+
+  async findOneByUsername(username: string): Promise<User> {
+    return this.userRepository.findOneOrFail({ where: { username } });
   }
 
   async updateOneById(id: number, updateUserDto: UpdateUserDto): Promise<User> {
