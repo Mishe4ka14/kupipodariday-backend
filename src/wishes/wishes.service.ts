@@ -5,12 +5,14 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { User } from 'src/users/entities/user.entity';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class WishesService {
   constructor(
     @InjectRepository(Wish)
     private wishesRepository: Repository<Wish>,
+    private userService: UsersService,
   ) {}
 
   async create(user: User, createWishDto: CreateWishDto): Promise<Wish> {
@@ -26,11 +28,33 @@ export class WishesService {
   }
 
   async findById(id: number): Promise<Wish> {
-    const wish = await this.wishesRepository.findOneBy({ id });
+    const wish = await this.wishesRepository.findOne({
+      where: { id },
+      relations: {
+        owner: true,
+        offers: true,
+      },
+    });
     if (!wish) {
       throw new NotFoundException('Такого подарка нет');
     }
     return wish;
+  }
+
+  async findAllWishesByUserQuery(query: number | string): Promise<Wish[]> {
+    const userQuery =
+      typeof query === 'number'
+        ? { id: query }
+        : typeof query === 'string'
+        ? { username: query }
+        : (() => {
+            throw new Error('Invalid query type');
+          })();
+
+    const wishes = await this.wishesRepository.find({
+      where: { owner: userQuery },
+    });
+    return wishes;
   }
 
   async updateOne(id: number, updateWishDto: UpdateWishDto): Promise<Wish> {
