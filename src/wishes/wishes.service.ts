@@ -57,6 +57,32 @@ export class WishesService {
     return wishes;
   }
 
+  async findLast(): Promise<Wish[]> {
+    try {
+      const wishes = await this.wishesRepository.find({
+        order: { createdAt: 'DESC' },
+        take: 40,
+      });
+      return wishes;
+    } catch (error) {
+      console.error('Ошибка при поиске подарков:', error);
+      throw error;
+    }
+  }
+
+  async findTop(): Promise<Wish[]> {
+    try {
+      const wishes = await this.wishesRepository.find({
+        order: { copied: 'DESC' },
+        take: 20,
+      });
+      return wishes;
+    } catch (error) {
+      console.error('Ошибка при поиске подарков:', error);
+      throw error;
+    }
+  }
+
   async updateOne(id: number, updateWishDto: UpdateWishDto): Promise<Wish> {
     const wish = await this.findById(id);
     if (!wish) {

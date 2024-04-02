@@ -29,6 +29,16 @@ export class WishesController {
     return await this.wishesService.create(userId, createWishDto);
   }
 
+  @Get('last')
+  async getLastWishes(): Promise<Wish[]> {
+    return await this.wishesService.findLast();
+  }
+
+  @Get('top')
+  async getTopWishes(): Promise<Wish[]> {
+    return await this.wishesService.findTop();
+  }
+
   @Get(':id')
   async getWishById(@Param('id') id: number): Promise<Wish> {
     return await this.wishesService.findById(id);
