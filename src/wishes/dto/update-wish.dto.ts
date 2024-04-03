@@ -27,6 +27,9 @@ export class UpdateWishDto {
   price: number;
 
   @IsOptional()
+  raised: number;
+
+  @IsOptional()
   @IsString()
   description: string;
 }

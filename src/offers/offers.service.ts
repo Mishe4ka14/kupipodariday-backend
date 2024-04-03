@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Offer } from './entities/offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
@@ -18,12 +22,26 @@ export class OffersService {
   async create(userId: number, createOfferDto: CreateOfferDto): Promise<Offer> {
     const user = await this.userService.findById(userId);
     const wish = await this.wishService.findById(createOfferDto.itemId);
+    if (user.id === wish.owner.id) {
+      throw new ForbiddenException('Нельзя донатить на свои подарки');
+    }
+    if (
+      createOfferDto.amount > wish.price - wish.raised ||
+      createOfferDto.amount > wish.price
+    ) {
+      throw new ForbiddenException(
+        'Сумма доната превышает необходимый остаток',
+      );
+    }
+    const total = Number(wish.raised) + createOfferDto.amount;
     const offer = this.offersRepository.create({
       ...createOfferDto,
       user: user,
       item: wish,
     });
-    return this.offersRepository.save(offer);
+    await this.offersRepository.save(offer);
+    await this.wishService.updateAmount(wish.id, total);
+    return offer;
   }
 
   async findAll(): Promise<Offer[]> {

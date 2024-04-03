@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -13,6 +14,7 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { WishesService } from './wishes.service';
 import { Wish } from './entities/wish.entity';
 import { JwtGuard } from 'src/auth/jwt/jwt.guard';
+import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Controller('wishes')
 export class WishesController {
@@ -40,10 +42,21 @@ export class WishesController {
     return await this.wishesService.findTop();
   }
 
+  @Patch(':id')
+  @UseGuards(JwtGuard)
+  async changeWishInfo(
+    @Req() req,
+    @Param('id') id: number,
+    @Body() updateWishDto: UpdateWishDto,
+  ): Promise<object> {
+    const userId = req.user.id;
+    await this.wishesService.updateOne(userId, id, updateWishDto);
+    return {};
+  }
+
   @Post(':id/copy')
   @UseGuards(JwtGuard)
   async copyWish(@Req() req, @Param('id') id: number): Promise<object> {
-    console.log('asd');
     const userId = req.user.id;
     await this.wishesService.copiedOne(id, userId);
     return {};

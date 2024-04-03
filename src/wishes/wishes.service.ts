@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Wish } from './entities/wish.entity';
 import { CreateWishDto } from './dto/create-wish.dto';
@@ -83,17 +87,40 @@ export class WishesService {
     }
   }
 
-  // async updateOne(id: number, userID: number): Promise<void> {
-  //   const wish = await this.findById(id);
-  //   const user = await this.userService.findById(userID);
-  //   if (!wish) {
-  //     throw new NotFoundException('Подарок не найден');
-  //   }
-  //   // Сохраняем изменения в базе данных
-  //   this.wishesRepository.create(user, wish);
-  //   wish.copied += 1;
-  //   await this.wishesRepository.save(wish);
-  // }
+  async updateOne(
+    userID: number,
+    id: number,
+    updateWishDto: UpdateWishDto,
+  ): Promise<Wish> {
+    const wish = await this.findById(id);
+    const user = await this.userService.findById(userID);
+    if (!wish) {
+      throw new NotFoundException('Подарок не найден');
+    }
+    if (userID !== user.id) {
+      throw new ForbiddenException('Можно редактировать только свои подарки');
+    }
+    if (wish.offers.length !== 0) {
+      throw new ForbiddenException(
+        'Нельзя редактировать подарок на который уже скинулись',
+      );
+    }
+    return await this.wishesRepository.save({
+      ...wish,
+      ...updateWishDto,
+    });
+  }
+
+  async updateAmount(id: number, total: number): Promise<Wish> {
+    const wish = await this.findById(id);
+    if (!wish) {
+      throw new NotFoundException('Подарок не найден');
+    }
+    return await this.wishesRepository.save({
+      ...wish,
+      raised: total,
+    });
+  }
 
   async copiedOne(id: number, userID: number): Promise<void> {
     const wish = await this.findById(id);
@@ -111,6 +138,8 @@ export class WishesService {
       id: null,
       copied: 0,
       owner: user,
+      offers: [],
+      raised: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
