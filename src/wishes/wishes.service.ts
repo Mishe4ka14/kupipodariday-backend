@@ -146,7 +146,7 @@ export class WishesService {
     await this.create(user, newWish);
   }
 
-  async removeOne(id: number, userID): Promise<Wish> {
+  async removeOne(id: number, userID: number): Promise<Wish> {
     const wish = await this.findById(id);
     if (!wish) {
       throw new Error(`Wish with id ${id} not found`);

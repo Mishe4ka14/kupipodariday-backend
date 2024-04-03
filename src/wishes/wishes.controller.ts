@@ -63,6 +63,7 @@ export class WishesController {
   }
 
   @Get(':id')
+  @UseGuards(JwtGuard)
   async getWishById(@Param('id') id: number): Promise<Wish> {
     return await this.wishesService.findById(id);
   }

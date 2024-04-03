@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Wishlist } from './entities/wishlist.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -43,6 +47,7 @@ export class WishlistsService {
       where: { id },
       relations: {
         items: true,
+        owner: true,
       },
     });
     if (!wishlist) {
@@ -54,16 +59,26 @@ export class WishlistsService {
   async updateWishlist(
     id: number,
     updateWishlistDto: UpdateWishlistDto,
+    userID: number,
   ): Promise<Wishlist> {
     const wishlist = await this.findWishlistById(id);
     if (!wishlist) {
       throw new NotFoundException('Такой коллекции нет');
     }
+    if (userID !== wishlist.owner.id) {
+      throw new NotAcceptableException('Нельзя редактировать чужие коллекции');
+    }
     return this.wishlistRepository.save({ ...wishlist, ...updateWishlistDto });
   }
 
-  async removeOne(id: number): Promise<Wishlist> {
+  async removeOne(id: number, userID: number): Promise<Wishlist> {
     const wishlist = await this.findWishlistById(id);
-    return await this.wishlistRepository.remove(wishlist);
+    if (!wishlist) {
+      throw new NotFoundException('Коллекция не найдена');
+    }
+    if (userID !== wishlist.owner.id) {
+      throw new NotAcceptableException('Нельзя удалять чужие коллекции');
+    }
+    return this.wishlistRepository.remove(wishlist);
   }
 }

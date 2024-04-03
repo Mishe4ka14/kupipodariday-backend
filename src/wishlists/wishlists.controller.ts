@@ -39,11 +39,14 @@ export class WishlistsController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtGuard)
   changeWishlist(
     @Param('id') id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
+    @Req() req,
   ): Promise<Wishlist> {
-    return this.wishlistService.updateWishlist(id, updateWishlistDto);
+    const userID = req.user.id;
+    return this.wishlistService.updateWishlist(id, updateWishlistDto, userID);
   }
 
   @Get(':id')
@@ -53,7 +56,9 @@ export class WishlistsController {
   }
 
   @Delete(':id')
-  async deleteWishlist(@Param('id') id: number): Promise<Wishlist> {
-    return await this.wishlistService.removeOne(id);
+  @UseGuards(JwtGuard)
+  async deleteWishlist(@Param('id') id: number, @Req() req): Promise<Wishlist> {
+    const userID = req.user.id;
+    return await this.wishlistService.removeOne(id, userID);
   }
 }

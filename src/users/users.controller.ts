@@ -24,6 +24,7 @@ export class UsersController {
     private wishesService: WishesService,
   ) {}
   @Get('me')
+  @UseGuards(JwtGuard)
   async findOwn(@Req() request): Promise<User> {
     const user = request.user;
     return await this.usersService.findById(user.id);
@@ -35,7 +36,6 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
     const userId = req.user.id;
-    // console.log(req.user);
     return await this.usersService.updateOneById(userId, updateUserDto);
   }
 

@@ -26,11 +26,13 @@ export class OffersController {
   }
 
   @Get()
+  @UseGuards(JwtGuard)
   findAll(): Promise<Offer[]> {
     return this.offerService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(JwtGuard)
   findOne(@Param('id') id: number): Promise<Offer> {
     return this.offerService.findOfferById(id);
   }
