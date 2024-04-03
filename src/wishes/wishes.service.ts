@@ -83,15 +83,46 @@ export class WishesService {
     }
   }
 
-  async updateOne(id: number, updateWishDto: UpdateWishDto): Promise<Wish> {
+  // async updateOne(id: number, userID: number): Promise<void> {
+  //   const wish = await this.findById(id);
+  //   const user = await this.userService.findById(userID);
+  //   if (!wish) {
+  //     throw new NotFoundException('Подарок не найден');
+  //   }
+  //   // Сохраняем изменения в базе данных
+  //   this.wishesRepository.create(user, wish);
+  //   wish.copied += 1;
+  //   await this.wishesRepository.save(wish);
+  // }
+
+  async copiedOne(id: number, userID: number): Promise<void> {
     const wish = await this.findById(id);
     if (!wish) {
       throw new NotFoundException('Подарок не найден');
     }
-    return this.wishesRepository.save({ ...wish, ...updateWishDto });
+
+    wish.copied += 1;
+    await this.wishesRepository.save(wish);
+
+    const user = await this.userService.findById(userID);
+
+    const newWish: Wish = {
+      ...wish,
+      id: null,
+      copied: 0,
+      owner: user,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    await this.create(user, newWish);
   }
 
-  async removeOne(id: number): Promise<void> {
+  async removeOne(id: number): Promise<Wish> {
+    const wish = await this.findById(id);
+    if (!wish) {
+      throw new Error(`Wish with id ${id} not found`);
+    }
     await this.wishesRepository.delete(id);
+    return wish;
   }
 }

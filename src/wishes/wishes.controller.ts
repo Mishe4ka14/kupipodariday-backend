@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -39,8 +40,22 @@ export class WishesController {
     return await this.wishesService.findTop();
   }
 
+  @Post(':id/copy')
+  @UseGuards(JwtGuard)
+  async copyWish(@Req() req, @Param('id') id: number): Promise<object> {
+    console.log('asd');
+    const userId = req.user.id;
+    await this.wishesService.copiedOne(id, userId);
+    return {};
+  }
+
   @Get(':id')
   async getWishById(@Param('id') id: number): Promise<Wish> {
     return await this.wishesService.findById(id);
+  }
+
+  @Delete(':id')
+  async deleteWish(@Param('id') id: number): Promise<Wish> {
+    return await this.wishesService.removeOne(id);
   }
 }
