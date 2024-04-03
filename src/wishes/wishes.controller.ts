@@ -68,7 +68,9 @@ export class WishesController {
   }
 
   @Delete(':id')
-  async deleteWish(@Param('id') id: number): Promise<Wish> {
-    return await this.wishesService.removeOne(id);
+  @UseGuards(JwtGuard)
+  async deleteWish(@Param('id') id: number, @Req() req): Promise<Wish> {
+    const userId = req.user.id;
+    return await this.wishesService.removeOne(id, userId);
   }
 }

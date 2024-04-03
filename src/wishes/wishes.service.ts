@@ -146,10 +146,13 @@ export class WishesService {
     await this.create(user, newWish);
   }
 
-  async removeOne(id: number): Promise<Wish> {
+  async removeOne(id: number, userID): Promise<Wish> {
     const wish = await this.findById(id);
     if (!wish) {
       throw new Error(`Wish with id ${id} not found`);
+    }
+    if (userID !== wish.owner.id) {
+      throw new ForbiddenException('Можно удалять только свои подарки');
     }
     await this.wishesRepository.delete(id);
     return wish;
