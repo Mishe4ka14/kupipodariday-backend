@@ -132,7 +132,6 @@ export class WishesService {
     await this.wishesRepository.save(wish);
 
     const user = await this.userService.findById(userID);
-
     const newWish: Wish = {
       ...wish,
       id: null,
@@ -143,6 +142,13 @@ export class WishesService {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+    if (
+      await this.wishesRepository.findOne({
+        where: { name: wish.name, owner: { id: user.id } },
+      })
+    ) {
+      throw new ForbiddenException('Вы уже копировали себе такой подарок');
+    }
     await this.create(user, newWish);
   }
 

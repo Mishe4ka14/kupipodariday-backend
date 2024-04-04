@@ -24,7 +24,7 @@ import { BcryptService } from 'src/bcrypt/bcrypt.service';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('jwt.secret'), // получаем ключ из конфигурации
         signOptions: {
-          expiresIn: configService.get<string>('jwt.ttl', '300s'),
+          expiresIn: configService.get<string>('jwt.ttl', '3000s'),
         },
       }),
       inject: [ConfigService],

@@ -26,7 +26,6 @@ export class AuthService {
       where: { username },
     });
 
-    console.log(password);
     if (
       user &&
       (await this.bcryptService.comparePasswords(password, user.password))
